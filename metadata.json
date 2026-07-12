@@ -1,0 +1,6 @@
+{
+  "name": "3D Gravity Simulator",
+  "description": "An interactive 3D celestial gravity sandbox where you can spawn planets, black holes, and customize orbital physics in real-time.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

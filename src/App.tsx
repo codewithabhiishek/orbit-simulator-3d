@@ -10,7 +10,7 @@ import { CosmicDashboard } from './components/CosmicDashboard';
 import { BodyInspector } from './components/BodyInspector';
 import { InstructionModal } from './components/InstructionModal';
 import { theme } from './theme/tokens';
-import { HelpCircle, Zap, GitMerge, Flame, Target, Plus, AlertTriangle, Info, Terminal, Menu, Activity, Clock, Sun, Settings, Play, Pause, Rocket } from 'lucide-react';
+import { HelpCircle, Zap, GitMerge, Flame, Target, Plus, AlertTriangle, Info, Terminal, Menu, Activity, Clock, Sun, Settings, Play, Pause, Rocket, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function App() {
   const [bodies, setBodies] = useState<Body[]>([]);
@@ -19,7 +19,7 @@ export default function App() {
   
   // Responsive mobile toggles
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isConsoleOpen, setIsConsoleOpen] = useState(false);
+  const [isConsoleOpen, setIsConsoleOpen] = useState(true);
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
   
   // HUD UI properties
@@ -816,32 +816,41 @@ export default function App() {
 
         {/* Redesigned Event Log — JPL style Mission Control console */}
         <div
-          className="absolute bottom-4 left-[22rem] flex flex-col pointer-events-auto overflow-hidden animate-panel-in"
+          className="absolute bottom-4 left-[20.5rem] flex flex-col pointer-events-auto overflow-hidden animate-panel-in"
           style={{
-            width: '310px',
-            height: '350px',
+            width: '290px',
+            height: isConsoleOpen ? '220px' : '40px',
             background: theme.colors.bgPanel,
             border: `1px solid ${theme.colors.borderSubtle}`,
             borderRadius: theme.radii.lg,
-            padding: '18px 20px',
+            padding: '10px 16px',
             boxShadow: theme.shadows.panel,
             fontFamily: theme.typography.fontSans,
+            transition: 'height 300ms cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         >
           {/* Header */}
           <div
-            className="flex items-center gap-2 pb-3 mb-3"
+            className="flex items-center justify-between pb-2 mb-2 cursor-pointer select-none"
             style={{
-              borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+              borderBottom: isConsoleOpen ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid transparent',
             }}
+            onClick={() => setIsConsoleOpen(!isConsoleOpen)}
           >
-            <Terminal className="w-3.5 h-3.5 text-[#E5E7EB]" />
-            <span
-              className="text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: '#CBD5E1' }}
+            <div className="flex items-center gap-2">
+              <Terminal className="w-3.5 h-3.5 text-[#E5E7EB]" />
+              <span
+                className="text-[11px] font-semibold uppercase tracking-wider"
+                style={{ color: '#CBD5E1' }}
+              >
+                Event Console
+              </span>
+            </div>
+            <button
+              className="text-[#A1A5B5] hover:text-white transition-colors"
             >
-              Event Console
-            </span>
+              {isConsoleOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+            </button>
           </div>
 
           {/* Log Area */}
@@ -850,6 +859,7 @@ export default function App() {
             className="flex-1 overflow-y-auto pr-1 flex flex-col gap-3 scrollbar-thin"
             style={{
               scrollBehavior: 'smooth',
+              display: isConsoleOpen ? 'flex' : 'none',
             }}
           >
             {logEvents.length === 0 ? (

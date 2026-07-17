@@ -56,7 +56,7 @@ export const CosmicDashboard: React.FC<CosmicDashboardProps> = ({
 
   return (
     <div
-      className={`absolute xl:top-6 xl:bottom-6 xl:left-6 lg:top-4 lg:bottom-4 lg:left-4 top-4 bottom-4 left-4 z-40 w-[280px] max-w-[85vw] flex flex-col select-none overflow-y-auto shrink-0 scrollbar-none rounded-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpen ? 'translate-x-0' : '-translate-x-[150%] xl:translate-x-0'}`}
+      className={`absolute xl:top-6 xl:bottom-6 xl:left-6 lg:top-4 lg:bottom-4 lg:left-4 top-4 bottom-4 left-4 z-40 w-[280px] max-w-[85vw] flex flex-col select-none overflow-y-auto shrink-0 scrollbar-none rounded-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpen ? 'translate-x-0' : '-translate-x-[120%]'}`}
       style={{
         background: theme.colors.glassPanel,
         backdropFilter: 'blur(24px) saturate(120%)',

@@ -18,7 +18,7 @@ export default function App() {
   const [stars, setStars] = useState<StarBackground[]>([]);
   
   // Responsive mobile toggles
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isConsoleOpen, setIsConsoleOpen] = useState(false);
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
   

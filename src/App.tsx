@@ -9,6 +9,7 @@ import { SpaceCanvas } from './components/SpaceCanvas';
 import { CosmicDashboard } from './components/CosmicDashboard';
 import { BodyInspector } from './components/BodyInspector';
 import { InstructionModal } from './components/InstructionModal';
+import { theme } from './theme/tokens';
 import { HelpCircle, Zap, GitMerge, Flame, Target, Plus, AlertTriangle, Info, Terminal, Menu, Activity, Clock, Sun, Settings, Play, Pause, Rocket } from 'lucide-react';
 
 export default function App() {
@@ -764,10 +765,16 @@ export default function App() {
             >
               {physicsConfig.paused ? <Play className="w-3.5 h-3.5 text-white fill-current ml-0.5" /> : <Pause className="w-3.5 h-3.5 text-white" />}
             </button>
-            <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#1C1F2B] transition-colors text-[#A1A5B5] hover:text-white">
+            <button 
+              onClick={() => setPhysicsConfig(p => ({ ...p, showTrails: !p.showTrails }))}
+              className={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#1C1F2B] transition-colors ${physicsConfig.showTrails ? 'text-white' : 'text-[#A1A5B5]'}`}
+            >
               <Sun className="w-4 h-4" />
             </button>
-            <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#1C1F2B] transition-colors text-[#A1A5B5] hover:text-white">
+            <button 
+              onClick={() => setShowInstructions(true)}
+              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#1C1F2B] transition-colors text-[#A1A5B5] hover:text-white"
+            >
               <Settings className="w-4 h-4" />
             </button>
             <button

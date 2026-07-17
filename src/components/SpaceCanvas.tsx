@@ -6,6 +6,7 @@
 import React, { useRef, useEffect, useState, MouseEvent, WheelEvent, TouchEvent } from 'react';
 import { Body, Particle, StarBackground, PhysicsConfig, SpawnPreset, Vector3D } from '../types';
 import { screenTo3D, predictTrajectory, calculateCircularOrbitVelocity, generateDefaultName } from '../utils/physicsHelpers';
+import { theme } from '../theme/tokens';
 import { Play, Pause, Compass, Move, Video, ZoomIn, Eye, RotateCw } from 'lucide-react';
 
 interface SpaceCanvasProps {

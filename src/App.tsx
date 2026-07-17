@@ -9,12 +9,17 @@ import { SpaceCanvas } from './components/SpaceCanvas';
 import { CosmicDashboard } from './components/CosmicDashboard';
 import { BodyInspector } from './components/BodyInspector';
 import { InstructionModal } from './components/InstructionModal';
-import { Play, Pause, Terminal, Eye, HelpCircle, RefreshCw, Volume2, Plus } from 'lucide-react';
+import { HelpCircle, Zap, GitMerge, Flame, Target, Plus, AlertTriangle, Info, Terminal, Menu, Activity, Clock, Sun, Settings, Play, Pause, Rocket } from 'lucide-react';
 
 export default function App() {
   const [bodies, setBodies] = useState<Body[]>([]);
   const [particles, setParticles] = useState<Particle[]>([]);
   const [stars, setStars] = useState<StarBackground[]>([]);
+  
+  // Responsive mobile toggles
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isConsoleOpen, setIsConsoleOpen] = useState(false);
+  const [isInspectorOpen, setIsInspectorOpen] = useState(false);
   
   // HUD UI properties
   const [selectedBodyId, setSelectedBodyId] = useState<string | null>(null);
@@ -32,7 +37,7 @@ export default function App() {
     type: 'planet',
     mass: 10,
     radius: 14,
-    color: '#3b82f6',
+    color: '#D4A017',
   });
 
   const [physicsConfig, setPhysicsConfig] = useState<PhysicsConfig>({
@@ -50,6 +55,15 @@ export default function App() {
   const [logEvents, setLogEvents] = useState<LogEvent[]>([]);
   const [showInstructions, setShowInstructions] = useState<boolean>(true);
   const [simulationTime, setSimulationTime] = useState<number>(0);
+  const simulationTimeRef = useRef(0);
+  const logContainerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll to newest event (bottom)
+  useEffect(() => {
+    if (logContainerRef.current) {
+      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+    }
+  }, [logEvents]);
 
   // References to keep animation loop clean of closure leaks
   const stateRef = useRef({ bodies, physicsConfig, particles, cameraMode, rideBodyId, selectedBodyId });
@@ -58,11 +72,13 @@ export default function App() {
   }, [bodies, physicsConfig, particles, cameraMode, rideBodyId, selectedBodyId]);
 
   // Telemetry Logs Ref to prevent logs overflow
-  const addLog = (text: string, type: 'info' | 'collision' | 'escape' | 'blackhole' = 'info') => {
+  const addLog = (title: string, description?: string, type: LogEvent['type'] = 'info') => {
+    const timeFormatted = (simulationTimeRef.current / 10).toFixed(2);
     const newLog: LogEvent = {
       id: Math.random().toString(),
-      timestamp: Date.now(),
-      text,
+      timestamp: timeFormatted,
+      title,
+      description,
       type,
     };
     setLogEvents((prev) => [newLog, ...prev.slice(0, 49)]); // keep last 50
@@ -88,7 +104,7 @@ export default function App() {
 
     // Initial default Scenario: Solar Oasis System
     loadPresetScenario('solar_system');
-    addLog('FLIGHT TELEMETRY SYSTEM BOOT SEQUENCED ONLINE', 'info');
+    addLog("System Online", "Telemetry system initialized", "orbit");
   }, []);
 
   // 2. CORE N-BODY PHYSICS INTEGRATION LOOP (60 FPS)
@@ -134,13 +150,23 @@ export default function App() {
           dt,
           config,
           (text, type, x, y, z, color) => {
-            addLog(text, type);
+            let title = "Collision";
+            let logType: LogEvent['type'] = 'collision';
+            if (type === 'blackhole') {
+              title = "Merge";
+              logType = 'merge';
+            }
+            addLog(title, text, logType);
             triggerExplosion(x, y, z, color);
           }
         );
 
         setBodies(nextBodies);
-        setSimulationTime((prev) => prev + dt);
+        setSimulationTime((prev) => {
+          const next = prev + dt;
+          simulationTimeRef.current = next;
+          return next;
+        });
 
         // Adjust camera target in ride camera mode to sit directly on ridden body
         if (stateRef.current.cameraMode === 'ride' && stateRef.current.rideBodyId) {
@@ -369,7 +395,7 @@ export default function App() {
         name: 'Sol Star',
         mass: 2200,
         radius: 46,
-        color: '#fbbf24',
+        color: theme.colors.meaning.star,
         type: 'star',
         x: 0, y: 0, z: 0,
         vx: 0, vy: 0, vz: 0,
@@ -382,7 +408,7 @@ export default function App() {
         name: 'Hermes Inner',
         mass: 8,
         radius: 10,
-        color: '#94a3b8',
+        color: '#A79A87', // Dust
         type: 'planet',
         x: 0, y: 0, z: -180,
         vx: 7.0, vy: 0, vz: 0, // sqrt(4 * 2200 / 180) => sqrt(48.8) = ~7.0
@@ -395,7 +421,7 @@ export default function App() {
         name: 'Terra Habitable',
         mass: 25,
         radius: 15,
-        color: '#3b82f6',
+        color: '#8A6D45', // Bronze
         type: 'planet',
         x: 0, y: 0, z: 340,
         vx: -5.1, vy: 0, vz: 0, // sqrt(4 * 2200 / 340) => ~5.1
@@ -408,7 +434,7 @@ export default function App() {
         name: 'Luna',
         mass: 0.15,
         radius: 6,
-        color: '#e2e8f0',
+        color: '#C8A96A', // Gold
         type: 'asteroid',
         x: 0, y: 0, z: 368, // Earth is at 340. Moon is +28.
         vx: -5.1 + 1.8, vy: 0, vz: 0, // Earth's vx + Moon's circular speed relative to earth: sqrt(4 * 25 / 28) => ~1.8
@@ -421,7 +447,7 @@ export default function App() {
         name: 'Zeus Giant',
         mass: 220,
         radius: 26,
-        color: '#f97316',
+        color: '#C85A17', // Orange/Brown
         type: 'gas_giant',
         x: 0, y: 0, z: -580,
         vx: 3.9, vy: 0, vz: 0, // sqrt(4 * 2200 / 580) => ~3.9
@@ -453,7 +479,7 @@ export default function App() {
         });
       }
 
-      addLog('LOADED: SOLAR SYSTEM SANDBOXPreserve equilibrium orbit matrices', 'info');
+      addLog("Scenario Loaded", "Solar system preset loaded", "orbit");
 
     } else if (type === 'binary_star') {
       setZoom(750);
@@ -465,7 +491,7 @@ export default function App() {
         name: 'Alpha Centauri A',
         mass: 1400,
         radius: 38,
-        color: '#fb923c',
+        color: theme.colors.meaning.star,
         type: 'star',
         x: -160, y: 0, z: 0,
         vx: 0, vy: 0, vz: -4.2, // Mutual attraction: sqrt(G*M_b / dist)
@@ -478,7 +504,7 @@ export default function App() {
         name: 'Alpha Centauri B',
         mass: 1400,
         radius: 38,
-        color: '#38bdf8',
+        color: theme.colors.meaning.star,
         type: 'star',
         x: 160, y: 0, z: 0,
         vx: 0, vy: 0, vz: 4.2,
@@ -498,7 +524,7 @@ export default function App() {
         trail: [],
       });
 
-      addLog('LOADED: BINARY STAR DANCING SYSTEM', 'info');
+      addLog("Scenario Loaded", "Binary dance preset loaded", "orbit");
 
     } else if (type === 'galaxy_collision') {
       setZoom(1000);
@@ -578,7 +604,7 @@ export default function App() {
         });
       }
 
-      addLog('LOADED: GALACTIC TIDAL MERGER SYSTEM', 'info');
+      addLog("Scenario Loaded", "Galactic fusion preset loaded", "orbit");
 
     } else if (type === 'black_hole_catastrophe') {
       setZoom(550);
@@ -590,7 +616,7 @@ export default function App() {
         name: 'Gargantua Singularity',
         mass: 9000,
         radius: 26,
-        color: '#a855f7',
+        color: theme.colors.meaning.blackHole,
         type: 'black_hole',
         x: 0, y: 0, z: 0,
         vx: 0, vy: 0, vz: 0,
@@ -634,7 +660,7 @@ export default function App() {
         });
       }
 
-      addLog('LOADED: DOOMED SINGULARITY EVENT HORIZON', 'blackhole');
+      addLog("Scenario Loaded", "Singularity event horizon preset loaded", "warning");
     }
 
     setBodies(seedBodies);
@@ -645,14 +671,14 @@ export default function App() {
       prev.map((b) => (b.id === id ? { ...b, ...updates } : b))
     );
     if (updates.name) {
-      addLog(`RECLASSIFIED: Celestial entity named ${updates.name}`, 'info');
+      addLog("Reclassified", `Celestial entity renamed to ${updates.name}`, "info");
     }
   };
 
   const handleDeleteBody = (id: string) => {
     const target = bodies.find((b) => b.id === id);
     if (target) {
-      addLog(`VAPORIZED: Celestial body ${target.name} removed from physical plane`, 'escape');
+      addLog("Explosion", `${target.name} vaporized and removed`, "explosion");
       triggerExplosion(target.x, target.y, target.z, target.color);
     }
     setBodies((prev) => prev.filter((b) => b.id !== id));
@@ -672,7 +698,7 @@ export default function App() {
     };
     setBodies((prev) => [...prev, newBody]);
     setSelectedBodyId(newId);
-    addLog(`SLINGSHOT LAUNCH: ${newBody.name} orbital path tracked`, 'info');
+    addLog("Body Spawned", `${newBody.name} launched into orbit`, "spawn");
   };
 
   const selectedBody = bodies.find((b) => b.id === selectedBodyId && !b.isDestroyed) || null;
@@ -684,7 +710,7 @@ export default function App() {
     : null;
 
   return (
-    <div className="w-full h-screen flex bg-slate-950 overflow-hidden relative font-sans text-slate-100" id="main-gravity-app-container">
+    <div className="w-full h-screen flex overflow-hidden relative" id="main-gravity-app-container" style={{ background: theme.colors.bgBase, fontFamily: theme.typography.fontSans, color: theme.colors.textPrimary }}>
       
       {/* 1. Left Glass Sidebar Controls */}
       <CosmicDashboard
@@ -708,32 +734,47 @@ export default function App() {
           setRideBodyId(null);
           setCameraMode('orbit');
           setCameraTarget({ x: 0, y: 0, z: 0 });
-          addLog('SYSTEM PURGED: ALL CELESTIAL MATERIAL DISSIPATED', 'escape');
+          addLog("Explosion", "All celestial material dissipated", "explosion");
         }}
         simulationTime={simulationTime}
+        isOpen={isSidebarOpen}
       />
 
       {/* 2. Main 3D Space Viewport Frame */}
       <div className="flex-1 h-full relative flex flex-col min-w-0">
         
-        {/* Top-Bar Navigation HUD */}
-        <div className="absolute top-0 inset-x-0 h-14 bg-gradient-to-b from-slate-950/90 to-transparent flex items-center justify-between px-6 z-10 pointer-events-none">
-          <div className="flex items-center gap-4 pointer-events-auto">
-            <div className="text-xs font-mono">
-              <span className="text-slate-500 mr-2">SYSTEM TIME:</span>
-              <span className="text-cyan-400 font-bold">{(simulationTime / 10).toFixed(1)} yr</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 pointer-events-auto">
-            {/* Instruction manual button */}
+        {/* Top-Bar Navigation HUD (Floating Pill) */}
+        <div className="absolute top-6 right-6 z-10 pointer-events-none flex items-center justify-end">
+          <div 
+            className="flex items-center gap-1.5 pointer-events-auto rounded-full p-1 pl-4 animate-panel-in shadow-2xl"
+            style={{ 
+              background: '#0a0c10',
+              border: `1px solid ${theme.colors.borderSubtle}` 
+            }}
+          >
+            <Clock className="w-3.5 h-3.5 text-[#A1A5B5]" />
+            <span className="text-[12px] font-mono text-[#A1A5B5] mr-2">
+              {physicsConfig.timeScale.toFixed(2)}x
+            </span>
+            <div className="w-[1px] h-4 bg-[#1C1F2B] mx-1" />
             <button
-              onClick={() => setShowInstructions(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900/80 border border-slate-800 hover:border-slate-700 hover:bg-slate-800 text-slate-300 text-xs font-mono rounded-lg transition-all"
-              id="btn-help-manual"
+              onClick={() => setPhysicsConfig(p => ({ ...p, paused: !p.paused }))}
+              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#1C1F2B] transition-colors"
+              id="btn-nav-play"
             >
-              <HelpCircle className="w-3.5 h-3.5 text-cyan-400" />
-              FLIGHT MANUAL
+              {physicsConfig.paused ? <Play className="w-3.5 h-3.5 text-white fill-current ml-0.5" /> : <Pause className="w-3.5 h-3.5 text-white" />}
+            </button>
+            <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#1C1F2B] transition-colors text-[#A1A5B5] hover:text-white">
+              <Sun className="w-4 h-4" />
+            </button>
+            <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#1C1F2B] transition-colors text-[#A1A5B5] hover:text-white">
+              <Settings className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#1C1F2B] transition-colors text-[#A1A5B5] hover:text-white"
+            >
+              <Menu className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -766,31 +807,113 @@ export default function App() {
           setZoom={setZoom}
         />
 
-        {/* Flight Telemetry Logs overlay (HUD terminal feed bottom-left) */}
-        <div className="absolute bottom-4 left-4 w-72 h-36 bg-slate-950/80 backdrop-blur-md border border-slate-900 rounded-xl p-3 flex flex-col gap-1.5 pointer-events-auto overflow-hidden">
-          <div className="flex items-center gap-1.5 text-[9px] font-bold tracking-wider text-slate-500 uppercase border-b border-slate-900 pb-1">
-            <Terminal className="w-3 h-3 text-cyan-400 animate-pulse" />
-            TELEMETRY LOGS FEED
+        {/* Redesigned Event Log — JPL style Mission Control console */}
+        <div
+          className="absolute bottom-4 left-[22rem] flex flex-col pointer-events-auto overflow-hidden animate-panel-in"
+          style={{
+            width: '310px',
+            height: '350px',
+            background: theme.colors.bgPanel,
+            border: `1px solid ${theme.colors.borderSubtle}`,
+            borderRadius: theme.radii.lg,
+            padding: '18px 20px',
+            boxShadow: theme.shadows.panel,
+            fontFamily: theme.typography.fontSans,
+          }}
+        >
+          {/* Header */}
+          <div
+            className="flex items-center gap-2 pb-3 mb-3"
+            style={{
+              borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+            }}
+          >
+            <Terminal className="w-3.5 h-3.5 text-[#E5E7EB]" />
+            <span
+              className="text-[11px] font-semibold uppercase tracking-wider"
+              style={{ color: '#CBD5E1' }}
+            >
+              Event Console
+            </span>
           </div>
-          <div className="flex-1 overflow-y-auto flex flex-col gap-1 scrollbar-thin scrollbar-thumb-slate-900 pr-0.5 text-[9px] font-mono leading-relaxed">
-            {logEvents.map((evt) => (
-              <div
-                key={evt.id}
-                className={`truncate ${
-                  evt.type === 'collision'
-                    ? 'text-orange-400 font-bold'
-                    : evt.type === 'blackhole'
-                    ? 'text-purple-400 font-bold animate-pulse'
-                    : evt.type === 'escape'
-                    ? 'text-rose-400'
-                    : 'text-slate-400'
-                }`}
-              >
-                &gt; {evt.text}
+
+          {/* Log Area */}
+          <div
+            ref={logContainerRef}
+            className="flex-1 overflow-y-auto pr-1 flex flex-col gap-3 scrollbar-thin"
+            style={{
+              scrollBehavior: 'smooth',
+            }}
+          >
+            {logEvents.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-center opacity-40 py-8">
+                <Info className="w-6 h-6 mb-2 text-[#94A3B8]" />
+                <p className="text-[12px] font-medium text-[#F8FAFC]">No events yet.</p>
+                <p className="text-[11px] text-[#94A3B8]">Interactions will appear here.</p>
               </div>
-            ))}
-            {logEvents.length === 0 && (
-              <div className="text-slate-600 italic">SYSTEM CHRONICLE CALM...</div>
+            ) : (
+              [...logEvents].reverse().map((evt) => {
+                let color = '#CBD5E1';
+                let icon = <Info className="w-3.5 h-3.5" />;
+                if (evt.type === 'collision') {
+                  color = theme.colors.meaning.collision;
+                  icon = <Zap className="w-3.5 h-3.5" />;
+                } else if (evt.type === 'merge') {
+                  color = theme.colors.meaning.info;
+                  icon = <GitMerge className="w-3.5 h-3.5" />;
+                } else if (evt.type === 'explosion') {
+                  color = theme.colors.meaning.error;
+                  icon = <Flame className="w-3.5 h-3.5" />;
+                } else if (evt.type === 'orbit') {
+                  color = theme.colors.meaning.success;
+                  icon = <Target className="w-3.5 h-3.5" />;
+                } else if (evt.type === 'spawn') {
+                  color = theme.colors.meaning.success;
+                  icon = <Plus className="w-3.5 h-3.5" />;
+                } else if (evt.type === 'warning') {
+                  color = theme.colors.meaning.warning;
+                  icon = <AlertTriangle className="w-3.5 h-3.5" />;
+                }
+
+                return (
+                  <div
+                    key={evt.id}
+                    className="flex gap-2.5 items-start p-2 rounded-lg transition-colors duration-150 animate-event-in"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.02)',
+                      border: '1px solid rgba(255, 255, 255, 0.03)',
+                    }}
+                  >
+                    <div style={{ color, marginTop: '2px' }} className="flex-shrink-0">
+                      {icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span
+                          className="text-[12px] font-semibold truncate"
+                          style={{ color }}
+                        >
+                          {evt.title}
+                        </span>
+                        <span
+                          className="text-[10px] font-mono opacity-50 flex-shrink-0"
+                          style={{ color: '#94A3B8' }}
+                        >
+                          [{evt.timestamp}]
+                        </span>
+                      </div>
+                      {evt.description && (
+                        <p
+                          className="text-[11px] mt-1 leading-relaxed break-words"
+                          style={{ color: '#94A3B8' }}
+                        >
+                          {evt.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
             )}
           </div>
         </div>

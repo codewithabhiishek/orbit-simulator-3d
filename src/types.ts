@@ -51,9 +51,10 @@ export interface StarBackground {
 
 export interface LogEvent {
   id: string;
-  timestamp: number; // relative simulation time
-  text: string;
-  type: 'info' | 'collision' | 'escape' | 'blackhole';
+  timestamp: string; // formatted simulation time, e.g. "12.43"
+  title: string;
+  description?: string;
+  type: 'collision' | 'merge' | 'explosion' | 'orbit' | 'spawn' | 'warning' | 'info';
 }
 
 export interface PhysicsConfig {

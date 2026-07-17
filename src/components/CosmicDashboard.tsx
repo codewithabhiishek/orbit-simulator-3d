@@ -4,8 +4,9 @@
  */
 
 import React from 'react';
-import { Body, BodyType, PhysicsConfig, SpawnPreset } from '../types';
-import { Play, Pause, Trash2, Eye, Compass, Sliders, LayoutGrid, Radio, Plus, Layers, Orbit } from 'lucide-react';
+import { Body, PhysicsConfig, SpawnPreset } from '../types';
+import { theme } from '../theme/tokens';
+import { Play, Pause, Trash2, Orbit } from 'lucide-react';
 
 interface CosmicDashboardProps {
   bodies: Body[];
@@ -18,15 +19,25 @@ interface CosmicDashboardProps {
   onLoadPreset: (presetName: string) => void;
   onClearAll: () => void;
   simulationTime: number;
+  isOpen: boolean;
 }
 
 const SPAWN_PRESETS: SpawnPreset[] = [
-  { name: 'Sol Star', type: 'star', mass: 1000, radius: 45, color: '#f59e0b' },
-  { name: 'Gargantua Void', type: 'black_hole', mass: 8000, radius: 25, color: '#a855f7' },
-  { name: 'Rocky Planet', type: 'planet', mass: 10, radius: 15, color: '#3b82f6' },
-  { name: 'Gas Giant', type: 'gas_giant', mass: 120, radius: 28, color: '#e2e8f0' },
-  { name: 'Asteroid', type: 'asteroid', mass: 0.1, radius: 6, color: '#94a3b8' },
+  { name: 'Star', type: 'star', mass: 1000, radius: 45, color: theme.colors.meaning.star },
+  { name: 'Black hole', type: 'black_hole', mass: 8000, radius: 25, color: theme.colors.meaning.blackHole },
+  { name: 'Rocky planet', type: 'planet', mass: 10, radius: 15, color: theme.colors.accent },
+  { name: 'Gas giant', type: 'gas_giant', mass: 120, radius: 28, color: '#A1A1AA' },
+  { name: 'Asteroid', type: 'asteroid', mass: 0.1, radius: 6, color: '#71717A' },
 ];
+
+const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <p
+    className="font-heading text-[12px] font-semibold tracking-wider uppercase mb-5"
+    style={{ color: theme.colors.textMuted, letterSpacing: '0.12em' }}
+  >
+    {children}
+  </p>
+);
 
 export const CosmicDashboard: React.FC<CosmicDashboardProps> = ({
   bodies,
@@ -39,272 +50,306 @@ export const CosmicDashboard: React.FC<CosmicDashboardProps> = ({
   onLoadPreset,
   onClearAll,
   simulationTime,
+  isOpen,
 }) => {
   const activeCount = bodies.filter((b) => !b.isDestroyed).length;
 
   return (
-    <div className="w-80 h-full flex flex-col bg-slate-950/85 backdrop-blur-lg border-r border-slate-800/80 text-slate-100 z-10 select-none overflow-y-auto shrink-0 scrollbar-thin scrollbar-thumb-slate-800">
-      {/* Header telemetry branding */}
-      <div className="p-5 border-b border-slate-800/80 flex flex-col gap-1.5">
-        <div className="flex items-center gap-2">
-          <Orbit className="w-5 h-5 text-cyan-400 animate-spin-slow" />
-          <h1 className="text-sm font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400 uppercase">
-            3D Gravity Simulator
+    <div
+      className={`absolute xl:top-6 xl:bottom-6 xl:left-6 lg:top-4 lg:bottom-4 lg:left-4 top-4 bottom-4 left-4 z-40 w-[280px] max-w-[85vw] flex flex-col select-none overflow-y-auto shrink-0 scrollbar-none rounded-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpen ? 'translate-x-0' : '-translate-x-[150%] xl:translate-x-0'}`}
+      style={{
+        background: theme.colors.glassPanel,
+        backdropFilter: 'blur(24px) saturate(120%)',
+        WebkitBackdropFilter: 'blur(24px) saturate(120%)',
+        border: `1px solid ${theme.colors.glassBorder}`,
+        boxShadow: theme.shadows.panel,
+        fontFamily: theme.typography.fontSans,
+      }}
+    >
+      {/* Header section with generous spacing */}
+      <div className="px-6 pt-9 pb-8 flex flex-col gap-3">
+        <div className="flex items-center gap-4">
+          <Orbit className="w-7 h-7 animate-spin-slow text-[#E5E7EB]" />
+          <h1
+            className="font-heading text-[34px] font-bold tracking-tight"
+            style={{ color: theme.colors.textPrimary, letterSpacing: '-0.03em' }}
+          >
+            Orbit Sim
           </h1>
         </div>
-        <p className="text-[10px] font-mono text-slate-400">GRAVITY TELEMETRY SYSTEM ACTIVE</p>
+        <p className="text-[13px] pl-11" style={{ color: theme.colors.textMuted }}>
+          N-body gravitational engine
+        </p>
       </div>
 
-      {/* Physics Core Control Panel */}
-      <div className="p-4 border-b border-slate-800/50 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-300">
-            <Sliders className="w-3.5 h-3.5 text-cyan-400" />
-            Physics Core
+      {/* Main content separated with spacing and divider lines */}
+      <div className="flex-1 px-6 pb-8 flex flex-col gap-8">
+        
+        {/* Simulation Section */}
+        <div className="flex flex-col gap-5">
+          <div className="flex items-center justify-between">
+            <SectionLabel>Simulation</SectionLabel>
+            <span
+              className="text-[11px] font-semibold px-2 py-0.5 rounded font-mono"
+              style={{
+                color: theme.colors.textPrimary,
+                background: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.10)',
+              }}
+            >
+              {activeCount} {activeCount === 1 ? 'BODY' : 'BODIES'}
+            </span>
           </div>
-          <span className="text-[10px] font-mono bg-cyan-950/40 border border-cyan-800/50 text-cyan-300 px-2 py-0.5 rounded">
-            {activeCount} BODIES
-          </span>
-        </div>
 
-        {/* Play/Pause & Action Buttons */}
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={() => setPhysicsConfig((prev) => ({ ...prev, paused: !prev.paused }))}
-            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium tracking-wide transition-all ${
-              physicsConfig.paused
-                ? 'bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold'
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-200'
-            }`}
-            id="btn-physics-play-pause"
-          >
-            {physicsConfig.paused ? <Play className="w-3.5 h-3.5 fill-current" /> : <Pause className="w-3.5 h-3.5" />}
-            {physicsConfig.paused ? 'RESUME' : 'PAUSE'}
-          </button>
-          <button
-            onClick={onClearAll}
-            className="flex items-center justify-center gap-1.5 px-3 py-2 bg-rose-950/40 border border-rose-800/40 hover:bg-rose-900/30 text-rose-300 rounded-lg text-xs font-medium tracking-wide transition-all"
-            id="btn-physics-clear-all"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            CLEAR
-          </button>
-        </div>
-
-        {/* Gravity Multiplier (G) */}
-        <div className="flex flex-col gap-1">
-          <div className="flex justify-between items-center text-[11px] font-mono text-slate-400">
-            <span>GRAVITY CONSTANT (G)</span>
-            <span className="text-cyan-400 font-bold">{physicsConfig.G.toFixed(1)}</span>
+          {/* Play/Pause & Clear Buttons - macOS style */}
+          <div className="grid grid-cols-2 gap-2.5">
+            <button
+              onClick={() => setPhysicsConfig((prev) => ({ ...prev, paused: !prev.paused }))}
+              className="interactive-btn flex items-center justify-center gap-2 px-3 rounded-xl text-[14px] font-semibold"
+              style={{
+                height: '40px',
+                background: physicsConfig.paused ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.04)',
+                border: 'none',
+                color: '#F8FAFC',
+                cursor: 'pointer',
+              }}
+              id="btn-physics-play-pause"
+            >
+              {physicsConfig.paused ? <Play className="w-3.5 h-3.5 fill-current" /> : <Pause className="w-3.5 h-3.5" />}
+              {physicsConfig.paused ? 'Resume' : 'Pause'}
+            </button>
+            <button
+              onClick={onClearAll}
+              className="interactive-btn flex items-center justify-center gap-1.5 px-3 rounded-xl text-[14px] font-semibold"
+              style={{
+                height: '40px',
+                background: 'rgba(255, 255, 255, 0.04)',
+                border: 'none',
+                color: theme.colors.textSecondary,
+                cursor: 'pointer',
+              }}
+              id="btn-physics-clear-all"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Clear
+            </button>
           </div>
-          <input
-            type="range"
-            min="0.5"
-            max="15.0"
-            step="0.5"
-            value={physicsConfig.G}
-            onChange={(e) => setPhysicsConfig((prev) => ({ ...prev, G: parseFloat(e.target.value) }))}
-            className="w-full accent-cyan-400 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
-            id="slider-gravity-g"
-          />
-        </div>
 
-        {/* Simulation Speed (Time step) */}
-        <div className="flex flex-col gap-1">
-          <div className="flex justify-between items-center text-[11px] font-mono text-slate-400">
-            <span>TEMPORAL TIME-STEP</span>
-            <span className="text-cyan-400 font-bold">{physicsConfig.timeScale.toFixed(2)}x</span>
+          {/* Gravity Multiplier (G) */}
+          <div className="flex flex-col gap-2.5">
+            <div className="flex justify-between items-center text-[13px]">
+              <span className="font-medium text-[#CBD5E1]">Gravity constant</span>
+              <span className="font-mono font-bold text-[#F8FAFC]">{physicsConfig.G.toFixed(1)}</span>
+            </div>
+            <input
+              type="range"
+              min="0.5"
+              max="15.0"
+              step="0.5"
+              value={physicsConfig.G}
+              onChange={(e) => setPhysicsConfig((prev) => ({ ...prev, G: parseFloat(e.target.value) }))}
+              id="slider-gravity-g"
+              style={{ height: '3px' }}
+            />
           </div>
-          <input
-            type="range"
-            min="0.05"
-            max="1.50"
-            step="0.05"
-            value={physicsConfig.timeScale}
-            onChange={(e) => setPhysicsConfig((prev) => ({ ...prev, timeScale: parseFloat(e.target.value) }))}
-            className="w-full accent-cyan-400 bg-slate-800 h-1.5 rounded-lg cursor-pointer"
-            id="slider-time-scale"
-          />
+
+          {/* Simulation Speed */}
+          <div className="flex flex-col gap-2.5">
+            <div className="flex justify-between items-center text-[13px]">
+              <span className="font-medium text-[#CBD5E1]">Time scale</span>
+              <span className="font-mono font-bold text-[#F8FAFC]">{physicsConfig.timeScale.toFixed(2)}×</span>
+            </div>
+            <input
+              type="range"
+              min="0.05"
+              max="1.50"
+              step="0.05"
+              value={physicsConfig.timeScale}
+              onChange={(e) => setPhysicsConfig((prev) => ({ ...prev, timeScale: parseFloat(e.target.value) }))}
+              id="slider-time-scale"
+              style={{ height: '3px' }}
+            />
+          </div>
+
+          {/* Collision Response Selector */}
+          <div className="flex flex-col gap-2.5">
+            <span className="text-[13px] font-medium text-[#CBD5E1]">Collision response</span>
+            <div className="grid grid-cols-3 gap-1.5">
+              {(['merge', 'bounce', 'none'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setPhysicsConfig((prev) => ({ ...prev, collisionMode: mode }))}
+                  className="rounded-xl text-[12px] font-semibold capitalize transition-all duration-150 text-center"
+                  style={{
+                    height: '40px',
+                    background: physicsConfig.collisionMode === mode ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+                    border: physicsConfig.collisionMode === mode ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid rgba(255, 255, 255, 0.04)',
+                    color: physicsConfig.collisionMode === mode ? theme.colors.textPrimary : theme.colors.textMuted,
+                    cursor: 'pointer',
+                  }}
+                  id={`btn-collision-mode-${mode}`}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = physicsConfig.collisionMode === mode ? 'rgba(255, 255, 255, 0.08)' : 'transparent'; }}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Collision Behavior Select */}
-        <div className="flex flex-col gap-1">
-          <span className="text-[10px] font-mono text-slate-400">COLLISION MECHANICAL RESPONSE</span>
-          <div className="grid grid-cols-3 gap-1">
-            {(['merge', 'bounce', 'none'] as const).map((mode) => (
+        {/* Divider line */}
+        <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.05)' }} />
+
+        {/* Scenario preset section */}
+        <div className="flex flex-col gap-4">
+          <SectionLabel>Scenarios</SectionLabel>
+          <div className="flex flex-col gap-1.5">
+            {[
+              { id: 'solar_system', name: 'Solar Oasis System', desc: 'Star with planets and asteroid belt' },
+              { id: 'binary_star', name: 'Binary Dance', desc: 'Two equal-mass stars in mutual orbit' },
+              { id: 'galaxy_collision', name: 'Galactic Fusion', desc: 'Two spiral systems colliding' },
+              { id: 'black_hole_catastrophe', name: 'Event Horizon', desc: 'Accretion disk around singularity' },
+            ].map((scen) => (
               <button
-                key={mode}
-                onClick={() => setPhysicsConfig((prev) => ({ ...prev, collisionMode: mode }))}
-                className={`px-2 py-1.5 border rounded text-[10px] font-mono uppercase transition-all ${
-                  physicsConfig.collisionMode === mode
-                    ? 'bg-cyan-500/10 border-cyan-400 text-cyan-300 font-bold'
-                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-300'
-                }`}
-                id={`btn-collision-mode-${mode}`}
+                key={scen.id}
+                onClick={() => onLoadPreset(scen.id)}
+                className="scenario-item text-left px-3.5 py-2.5 rounded-xl"
+                style={{
+                  background: 'transparent',
+                  border: '1px solid transparent',
+                  cursor: 'pointer',
+                }}
+                id={`btn-preset-${scen.id}`}
               >
-                {mode}
+                <div className="text-[13px] font-semibold text-[#F8FAFC]">{scen.name}</div>
+                <div className="text-[11px] text-[#94A3B8] leading-normal">{scen.desc}</div>
               </button>
             ))}
           </div>
         </div>
-      </div>
 
-      {/* Preset cosmic scenarios */}
-      <div className="p-4 border-b border-slate-800/50 flex flex-col gap-2.5">
-        <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-300">
-          <Layers className="w-3.5 h-3.5 text-indigo-400" />
-          Cosmic Presets
-        </div>
-        <div className="flex flex-col gap-1.5">
-          {[
-            { id: 'solar_system', name: 'Solar Oasis System', desc: 'Stable star with orbiting planets and asteroid field.' },
-            { id: 'binary_star', name: 'Binary Dance', desc: 'Two equal-mass stars in chaotic orbits.' },
-            { id: 'galaxy_collision', name: 'Galactic Fusion', desc: 'Two beautiful colliding spiral systems of space dust.' },
-            { id: 'black_hole_catastrophe', name: 'Black Hole Event Horizon', desc: 'A giant singularity tearing stars and dust apart.' },
-          ].map((scen) => (
-            <button
-              key={scen.id}
-              onClick={() => onLoadPreset(scen.id)}
-              className="text-left p-2.5 bg-slate-900 hover:bg-slate-800/80 rounded-lg border border-slate-800 hover:border-slate-700 transition-all group"
-              id={`btn-preset-${scen.id}`}
-            >
-              <div className="text-[11px] font-semibold text-slate-200 group-hover:text-cyan-400 transition-colors">
-                {scen.name}
-              </div>
-              <div className="text-[9px] text-slate-400 leading-normal mt-0.5">{scen.desc}</div>
-            </button>
-          ))}
-        </div>
-      </div>
+        {/* Divider line */}
+        <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.05)' }} />
 
-      {/* Body Launcher presets */}
-      <div className="p-4 border-b border-slate-800/50 flex flex-col gap-3">
-        <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-300">
-          <Plus className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-          Body Spawner Tool
-        </div>
-        <p className="text-[9px] text-slate-400">Select a preset template, then use the <b>Launch</b> button or click & drag on the canvas to throw into orbit.</p>
+        {/* Body Spawner presets */}
+        <div className="flex flex-col gap-4">
+          <SectionLabel>Spawn Body</SectionLabel>
+          <p className="text-[13px] leading-relaxed text-[#94A3B8] mb-1">
+            Choose a type, then click Launch or drag on the canvas to slingshot.
+          </p>
 
-        <div className="flex flex-col gap-1.5">
-          {SPAWN_PRESETS.map((preset) => {
-            const isSelected = spawnPreset.type === preset.type;
-            return (
-              <button
-                key={preset.type}
-                onClick={() => setSpawnPreset(preset)}
-                className={`flex items-center justify-between p-2 rounded-lg border transition-all text-xs font-mono ${
-                  isSelected
-                    ? 'bg-cyan-500/10 border-cyan-400 text-cyan-300 font-semibold shadow-md shadow-cyan-500/5'
-                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'
-                }`}
-                id={`btn-spawner-preset-${preset.type}`}
-              >
-                <div className="flex items-center gap-2">
-                  <span
-                    className="w-2.5 h-2.5 rounded-full inline-block shadow-inner"
-                    style={{ backgroundColor: preset.color, boxShadow: `0 0 6px ${preset.color}` }}
-                  />
-                  <span>{preset.name.toUpperCase()}</span>
-                </div>
-                <span className="text-[10px] text-slate-500">M: {preset.mass}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Grid overlay & trail switches */}
-      <div className="p-4 border-b border-slate-800/50 flex flex-col gap-3">
-        <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-300">
-          <LayoutGrid className="w-3.5 h-3.5 text-slate-400" />
-          HUD Settings
-        </div>
-        <div className="grid grid-cols-2 gap-2 text-[10px] font-mono text-slate-300">
-          <label className="flex items-center gap-2 cursor-pointer bg-slate-900 p-2 rounded border border-slate-800 hover:border-slate-700 transition-all">
-            <input
-              type="checkbox"
-              checked={physicsConfig.gridEnabled}
-              onChange={(e) => setPhysicsConfig((prev) => ({ ...prev, gridEnabled: e.target.checked }))}
-              className="rounded border-slate-700 text-cyan-600 bg-slate-800 focus:ring-0"
-            />
-            <span>3D GRID</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer bg-slate-900 p-2 rounded border border-slate-800 hover:border-slate-700 transition-all">
-            <input
-              type="checkbox"
-              checked={physicsConfig.showTrails}
-              onChange={(e) => setPhysicsConfig((prev) => ({ ...prev, showTrails: e.target.checked }))}
-              className="rounded border-slate-700 text-cyan-600 bg-slate-800 focus:ring-0"
-            />
-            <span>TRAILS</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer bg-slate-900 p-2 rounded border border-slate-800 hover:border-slate-700 transition-all">
-            <input
-              type="checkbox"
-              checked={physicsConfig.showVectors}
-              onChange={(e) => setPhysicsConfig((prev) => ({ ...prev, showVectors: e.target.checked }))}
-              className="rounded border-slate-700 text-cyan-600 bg-slate-800 focus:ring-0"
-            />
-            <span>VECTORS</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer bg-slate-900 p-2 rounded border border-slate-800 hover:border-slate-700 transition-all">
-            <input
-              type="checkbox"
-              checked={physicsConfig.collisionMode !== 'none'}
-              onChange={(e) => setPhysicsConfig((prev) => ({ ...prev, collisionMode: e.target.checked ? 'merge' : 'none' }))}
-              className="rounded border-slate-700 text-cyan-600 bg-slate-800 focus:ring-0"
-            />
-            <span>COLLISIONS</span>
-          </label>
-        </div>
-      </div>
-
-      {/* Active Bodies List */}
-      <div className="p-4 flex-1 flex flex-col gap-2">
-        <div className="flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-slate-300">
-          <span className="flex items-center gap-1.5">
-            <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-            Active Orbiters
-          </span>
-          <span className="text-[10px] font-mono text-slate-500">SELECT TO TRACK</span>
-        </div>
-
-        <div className="flex-1 overflow-y-auto max-h-72 flex flex-col gap-1.5 scrollbar-thin scrollbar-thumb-slate-800 pr-1">
-          {bodies
-            .filter((b) => !b.isDestroyed)
-            .map((body) => {
-              const isSelected = selectedBodyId === body.id;
-              const speed = Math.sqrt(body.vx * body.vx + body.vy * body.vy + body.vz * body.vz);
+          <div className="flex flex-col gap-1.5">
+            {SPAWN_PRESETS.map((preset) => {
+              const isSelected = spawnPreset.type === preset.type;
               return (
-                <div
-                  key={body.id}
-                  onClick={() => onSelectBody(body.id)}
-                  className={`flex items-center justify-between p-2 rounded-lg border cursor-pointer transition-all ${
-                    isSelected
-                      ? 'bg-cyan-500/10 border-cyan-400 text-cyan-300'
-                      : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 text-slate-300'
-                  }`}
-                  id={`orbiter-row-${body.id}`}
+                <button
+                  key={preset.type}
+                  onClick={() => setSpawnPreset(preset)}
+                  className="interactive-btn flex items-center justify-between px-3.5 py-2 rounded-xl text-[13px] font-semibold"
+                  style={{
+                    height: '40px',
+                    background: isSelected ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+                    border: isSelected ? '1px solid rgba(255, 255, 255, 0.22)' : '1px solid rgba(255, 255, 255, 0.04)',
+                    color: isSelected ? '#F8FAFC' : '#CBD5E1',
+                    cursor: 'pointer',
+                  }}
+                  id={`btn-spawner-preset-${preset.type}`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <span
-                      className="w-2 h-2 rounded-full shadow-lg"
-                      style={{ backgroundColor: body.color, boxShadow: `0 0 5px ${body.color}` }}
+                      className="w-2 h-2 rounded-full inline-block flex-shrink-0"
+                      style={{ backgroundColor: preset.color }}
                     />
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-bold font-mono tracking-wide">{body.name.toUpperCase()}</span>
-                      <span className="text-[8px] text-slate-500 font-mono">MASS: {body.mass.toFixed(1)}</span>
-                    </div>
+                    <span>{preset.name}</span>
                   </div>
-                  <span className="text-[9px] font-mono text-slate-400">{speed.toFixed(1)} km/s</span>
-                </div>
+                  <span className="text-[11px] font-mono text-[#64748B]">M {preset.mass}</span>
+                </button>
               );
             })}
-          {activeCount === 0 && (
-            <div className="text-center py-6 text-slate-500 text-xs font-mono border border-dashed border-slate-800 rounded-lg">
-              SYSTEM IS EMPTY
-            </div>
-          )}
+          </div>
+        </div>
+
+        {/* Divider line */}
+        <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.05)' }} />
+
+        {/* Display options */}
+        <div className="flex flex-col gap-4">
+          <SectionLabel>Display</SectionLabel>
+          <div className="flex flex-col gap-3.5">
+            {[
+              { key: 'gridEnabled' as const, label: 'Reference grid' },
+              { key: 'showTrails' as const, label: 'Orbit trails' },
+              { key: 'showVectors' as const, label: 'Velocity vectors' },
+            ].map(({ key, label }) => (
+              <label key={key} className="flex items-center gap-3 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={physicsConfig[key] as boolean}
+                  onChange={(e) => setPhysicsConfig((prev) => ({ ...prev, [key]: e.target.checked }))}
+                />
+                <span className="text-[13px] font-medium text-[#CBD5E1] group-hover:text-[#F8FAFC] transition-colors">
+                  {label}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Divider line */}
+        <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.05)' }} />
+
+        {/* Active Orbiters */}
+        <div className="flex flex-col gap-4 flex-1">
+          <SectionLabel>Active Orbiters</SectionLabel>
+
+          <div className="flex-1 overflow-y-auto max-h-72 flex flex-col gap-1 pr-0.5">
+            {bodies
+              .filter((b) => !b.isDestroyed)
+              .map((body) => {
+                const isSelected = selectedBodyId === body.id;
+                const speed = Math.sqrt(body.vx * body.vx + body.vy * body.vy + body.vz * body.vz);
+                return (
+                  <div
+                    key={body.id}
+                    onClick={() => onSelectBody(body.id)}
+                    className="flex items-center justify-between px-3.5 py-1.5 rounded-lg cursor-pointer transition-all duration-150 animate-fade-in"
+                    style={{
+                      background: isSelected ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+                      border: isSelected ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid transparent',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = isSelected ? 'rgba(255, 255, 255, 0.08)' : 'transparent'; }}
+                    id={`orbiter-row-${body.id}`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span
+                        className="w-2 h-2 rounded-full inline-block flex-shrink-0"
+                        style={{ backgroundColor: body.color }}
+                      />
+                      <div className="flex flex-col">
+                        <span
+                          className="text-[12px] font-semibold leading-tight"
+                          style={{ color: isSelected ? theme.colors.textPrimary : theme.colors.textSecondary }}
+                        >
+                          {body.name}
+                        </span>
+                        <span className="text-[10px] font-mono text-[#64748B]">M {body.mass.toFixed(1)}</span>
+                      </div>
+                    </div>
+                    <span className="font-mono text-[11px] text-[#CBD5E1]">{speed.toFixed(1)}</span>
+                  </div>
+                );
+              })}
+            {activeCount === 0 && (
+              <div
+                className="text-center py-6 text-[12px] text-[#64748B] rounded-lg"
+                style={{ border: '1px dashed rgba(255, 255, 255, 0.06)' }}
+              >
+                System is empty
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -177,43 +177,44 @@ export const SpaceCanvas: React.FC<SpaceCanvasProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Clear with starry deep space gradient
-    ctx.fillStyle = '#0a0b10';
+    // Clear — deep almost-black
+    ctx.fillStyle = '#09090d';
     ctx.fillRect(0, 0, dimensions.width, dimensions.height);
 
-    // Subtle cosmic glow in the center
+    // Very subtle cinematic center glow (barely visible)
     const radialGlow = ctx.createRadialGradient(
       dimensions.width / 2,
       dimensions.height / 2,
       10,
       dimensions.width / 2,
       dimensions.height / 2,
-      dimensions.width * 0.7
+      dimensions.width * 0.55
     );
-    radialGlow.addColorStop(0, '#121324');
-    radialGlow.addColorStop(1, '#050508');
+    radialGlow.addColorStop(0, 'rgba(12,13,22,0.6)');
+    radialGlow.addColorStop(1, 'rgba(5,5,8,0)');
     ctx.fillStyle = radialGlow;
     ctx.fillRect(0, 0, dimensions.width, dimensions.height);
 
-    // 1. Draw Space Dust/Background Stars with Parallax
+    // 1. Stars with subtle parallax depth
     stars.forEach((star) => {
       const p = project(star.x, star.y, star.z);
       if (p) {
-        const size = star.size * (p.scale * 0.4);
-        if (size > 0.1) {
+        const size = star.size * (p.scale * 0.38);
+        if (size > 0.08) {
           ctx.beginPath();
           ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
-          const alpha = Math.min(1, star.brightness * (1000 / p.depth));
-          ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+          // Slightly warm white for realism, not pure white
+          const alpha = Math.min(0.85, star.brightness * (900 / p.depth));
+          ctx.fillStyle = `rgba(240, 242, 255, ${alpha})`;
           ctx.fill();
         }
       }
     });
 
-    // 2. Draw 3D Sci-Fi Celestial Grid
+    // 2. Reference grid — very subtle
     if (physicsConfig.gridEnabled) {
-      ctx.strokeStyle = 'rgba(74, 85, 104, 0.15)';
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(255, 248, 235, 0.04)';
+      ctx.lineWidth = 0.7;
 
       const activeTarget = cameraMode === 'ride' && riddenBody
         ? { x: riddenBody.x, y: riddenBody.y, z: riddenBody.z }
@@ -257,41 +258,39 @@ export const SpaceCanvas: React.FC<SpaceCanvasProps> = ({
       }
     }
 
-    // 3. Draw Orbit Trails
+    // 3. Orbit trails — subtle fade
     if (physicsConfig.showTrails) {
       bodies.forEach((body) => {
         if (body.isDestroyed || body.trail.length < 2) return;
 
-        ctx.lineWidth = Math.max(1, body.radius * 0.15);
+        ctx.lineWidth = Math.max(0.7, body.radius * 0.10);
         
-        // Draw segmented trail with smooth fade
         for (let i = 1; i < body.trail.length; i++) {
           const p1 = project(body.trail[i - 1].x, body.trail[i - 1].y, body.trail[i - 1].z);
           const p2 = project(body.trail[i].x, body.trail[i].y, body.trail[i].z);
 
           if (p1 && p2) {
-            const opacity = (i / body.trail.length) * 0.45;
+            const opacity = (i / body.trail.length) * 0.28;
             ctx.beginPath();
             ctx.moveTo(p1.x, p1.y);
             ctx.lineTo(p2.x, p2.y);
             const bColor = body.color || '#ffffff';
             ctx.strokeStyle = toRgba(bColor, opacity);
-
             ctx.stroke();
           }
         }
       });
     }
 
-    // 4. Draw Predicted Trajectory Paths (Dotted vector lines)
+    // 4. Predicted trajectory paths
     if (physicsConfig.showVectors && trajectoryPaths.length > 0) {
       trajectoryPaths.forEach((path, idx) => {
         if (path.length < 2) return;
 
         const isNewLauncher = idx === trajectoryPaths.length - 1 && isSpawning;
-        ctx.strokeStyle = isNewLauncher ? '#22d3ee' : 'rgba(255, 255, 255, 0.2)';
-        ctx.lineWidth = isNewLauncher ? 1.5 : 1;
-        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = isNewLauncher ? 'rgba(79, 128, 255, 0.7)' : 'rgba(255, 248, 235, 0.12)';
+        ctx.lineWidth = isNewLauncher ? 1.2 : 0.8;
+        ctx.setLineDash([4, 6]);
 
         ctx.beginPath();
         let started = false;
@@ -307,7 +306,7 @@ export const SpaceCanvas: React.FC<SpaceCanvasProps> = ({
           }
         });
         ctx.stroke();
-        ctx.setLineDash([]); // Reset
+        ctx.setLineDash([]);
       });
     }
 
@@ -398,7 +397,7 @@ export const SpaceCanvas: React.FC<SpaceCanvasProps> = ({
         ctx.fill();
 
         // 4 Lens flare lines
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.strokeStyle = 'rgba(255, 248, 235, 0.4)';
         ctx.lineWidth = 0.8;
         ctx.beginPath();
         ctx.moveTo(proj.x - radius * 6, proj.y);
@@ -438,46 +437,49 @@ export const SpaceCanvas: React.FC<SpaceCanvasProps> = ({
 
       ctx.restore();
 
-      // Draw Selected Bracket Indicator (cyberpunk square target bracket)
+      // Selection indicator — clean, soft blue arc brackets
       if (selectedBodyId === body.id) {
-        ctx.strokeStyle = '#22d3ee';
-        ctx.lineWidth = 1.2;
-        const bracketSize = Math.max(12, radius + 8);
+        const time = performance.now();
+        const pulse = 0.5 + 0.5 * Math.sin(time / 500); // smooth 0 to 1 over 1000ms
+        ctx.strokeStyle = `rgba(255, 248, 235, ${0.15 + 0.2 * pulse})`; // Soft glowing selection border
+        ctx.lineWidth = 1.5;
+        const bracketSize = Math.max(10, radius + 7);
         ctx.beginPath();
-        
-        // Top-Left Corner
+
+        // Top-Left
         ctx.moveTo(proj.x - bracketSize, proj.y - bracketSize + 5);
         ctx.lineTo(proj.x - bracketSize, proj.y - bracketSize);
         ctx.lineTo(proj.x - bracketSize + 5, proj.y - bracketSize);
 
-        // Top-Right Corner
+        // Top-Right
         ctx.moveTo(proj.x + bracketSize, proj.y - bracketSize + 5);
         ctx.lineTo(proj.x + bracketSize, proj.y - bracketSize);
         ctx.lineTo(proj.x + bracketSize - 5, proj.y - bracketSize);
 
-        // Bottom-Left Corner
+        // Bottom-Left
         ctx.moveTo(proj.x - bracketSize, proj.y + bracketSize - 5);
         ctx.lineTo(proj.x - bracketSize, proj.y + bracketSize);
         ctx.lineTo(proj.x - bracketSize + 5, proj.y + bracketSize);
 
-        // Bottom-Right Corner
+        // Bottom-Right
         ctx.moveTo(proj.x + bracketSize, proj.y + bracketSize - 5);
         ctx.lineTo(proj.x + bracketSize, proj.y + bracketSize);
         ctx.lineTo(proj.x + bracketSize - 5, proj.y + bracketSize);
 
         ctx.stroke();
 
-        // Target label overlay (Monospace HUD style)
-        ctx.fillStyle = '#22d3ee';
-        ctx.font = '10px "JetBrains Mono", monospace';
-        ctx.fillText(`TRK > ${body.name.toUpperCase()}`, proj.x + bracketSize + 6, proj.y - 4);
-        ctx.fillStyle = 'rgba(34, 211, 238, 0.6)';
-        ctx.fillText(`M: ${body.mass.toFixed(1)}e24 kg`, proj.x + bracketSize + 6, proj.y + 8);
+        // Label
+        ctx.fillStyle = '#F8FAFC'; // Primary text
+        ctx.font = '700 12px "General Sans", sans-serif'; // General Sans title font
+        ctx.fillText(`${body.name}`, proj.x + bracketSize + 6, proj.y - 2);
+        ctx.fillStyle = '#94A3B8'; // Secondary text
+        ctx.font = '11px "JetBrains Mono", monospace'; // JetBrains Mono
+        ctx.fillText(`M ${body.mass.toFixed(1)}`, proj.x + bracketSize + 6, proj.y + 10);
       } else {
-        // Ordinary label overlay
+        // Ordinary name label
         if (radius > 4) {
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-          ctx.font = '9px "Inter", sans-serif';
+          ctx.fillStyle = 'rgba(148, 163, 184, 0.45)'; // Secondary text with opacity
+          ctx.font = '11px Inter, sans-serif';
           ctx.fillText(body.name, proj.x + radius + 4, proj.y + 3);
         }
       }
@@ -527,50 +529,48 @@ export const SpaceCanvas: React.FC<SpaceCanvasProps> = ({
       }
     });
 
-    // 7. Draw ACTIVE LAUNCHER SLINGSHOT VECTOR (When spawning)
+    // 7. Slingshot aim vector
     if (isSpawning && spawnStartPos && spawnScreenStart) {
       const pStart = project(spawnStartPos.x, spawnStartPos.y, spawnStartPos.z);
       if (pStart) {
-        // Draw the body mockup to launch
+        // Preview body
         const mockupRadius = Math.max(2, spawnPreset.radius * pStart.scale * 0.15);
         ctx.beginPath();
         ctx.arc(pStart.x, pStart.y, mockupRadius, 0, Math.PI * 2);
         ctx.fillStyle = spawnPreset.color;
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = spawnPreset.color;
         ctx.fill();
-        ctx.shadowBlur = 0;
 
-        // Velocity Aiming Line
-        // We find current drag end point
+        // Velocity line — soft blue
         const dragScreenX = lastMouseX;
         const dragScreenY = lastMouseY;
 
-        ctx.strokeStyle = '#06b6d4'; // Cyan
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(79, 128, 255, 0.65)';
+        ctx.lineWidth = 1.2;
+        ctx.setLineDash([5, 5]);
         ctx.beginPath();
         ctx.moveTo(pStart.x, pStart.y);
         ctx.lineTo(dragScreenX, dragScreenY);
         ctx.stroke();
+        ctx.setLineDash([]);
 
-        // Draw aiming arrow pointer
+        // Arrow tip
         const aimAngle = Math.atan2(dragScreenY - pStart.y, dragScreenX - pStart.x);
         ctx.beginPath();
         ctx.moveTo(dragScreenX, dragScreenY);
-        ctx.lineTo(dragScreenX - 8 * Math.cos(aimAngle - Math.PI / 6), dragScreenY - 8 * Math.sin(aimAngle - Math.PI / 6));
-        ctx.lineTo(dragScreenX - 8 * Math.cos(aimAngle + Math.PI / 6), dragScreenY - 8 * Math.sin(aimAngle + Math.PI / 6));
-        ctx.fillStyle = '#06b6d4';
+        ctx.lineTo(dragScreenX - 7 * Math.cos(aimAngle - Math.PI / 6), dragScreenY - 7 * Math.sin(aimAngle - Math.PI / 6));
+        ctx.lineTo(dragScreenX - 7 * Math.cos(aimAngle + Math.PI / 6), dragScreenY - 7 * Math.sin(aimAngle + Math.PI / 6));
+        ctx.fillStyle = 'rgba(79, 128, 255, 0.65)';
         ctx.fill();
 
-        // Telemetry readout
+        // Speed readout
         const speed = Math.sqrt(
           spawnVelocity.x * spawnVelocity.x +
           spawnVelocity.y * spawnVelocity.y +
           spawnVelocity.z * spawnVelocity.z
         );
-        ctx.fillStyle = '#22d3ee';
-        ctx.font = '10px "JetBrains Mono", monospace';
-        ctx.fillText(`LAUNCH VELOCITY: ${speed.toFixed(1)} km/s`, dragScreenX + 12, dragScreenY + 4);
+        ctx.fillStyle = '#CBD5E1';
+        ctx.font = '11px "JetBrains Mono", monospace';
+        ctx.fillText(`${speed.toFixed(1)} km/s`, dragScreenX + 10, dragScreenY + 4);
       }
     }
 
@@ -581,7 +581,7 @@ export const SpaceCanvas: React.FC<SpaceCanvasProps> = ({
 
   // Helper to safely convert any color (hex or rgb) to rgba with custom opacity
   function toRgba(col: string, opacity: number): string {
-    if (!col) return `rgba(255, 255, 255, ${opacity})`;
+    if (!col) return `rgba(255, 248, 235, ${opacity})`;
     let r = 0, g = 0, b = 0;
     try {
       if (col.startsWith('#')) {
@@ -608,7 +608,7 @@ export const SpaceCanvas: React.FC<SpaceCanvasProps> = ({
     } catch (e) {
       // safe fallback
     }
-    return `rgba(255, 255, 255, ${opacity})`;
+    return `rgba(255, 248, 235, ${opacity})`;
   }
 
   // Darkens a color (hex/rgb) for correct sphere shading
@@ -637,11 +637,11 @@ export const SpaceCanvas: React.FC<SpaceCanvasProps> = ({
     return `rgb(${r}, ${g}, ${b})`;
   }
 
-  // Draw 3D coordinate widget in bottom right
+  // Minimal XYZ compass in top-right corner
   const drawCompass = (ctx: CanvasRenderingContext2D) => {
-    const cx = dimensions.width - 60;
-    const cy = 60;
-    const size = 30;
+    const cx = dimensions.width - 48;
+    const cy = 48;
+    const size = 22;
 
     const cosY = Math.cos(yaw);
     const sinY = Math.sin(yaw);
@@ -649,7 +649,6 @@ export const SpaceCanvas: React.FC<SpaceCanvasProps> = ({
     const sinP = Math.sin(pitch);
 
     const projectCompassAxis = (ax: number, ay: number, az: number) => {
-      // Rotate Compass Axis
       const rx1 = ax * cosY - az * sinY;
       const rz1 = ax * sinY + az * cosY;
       const rx2 = rx1;
@@ -661,47 +660,40 @@ export const SpaceCanvas: React.FC<SpaceCanvasProps> = ({
     const yAxis = projectCompassAxis(0, 1, 0);
     const zAxis = projectCompassAxis(0, 0, 1);
 
-    // Grid center backdrop
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.4)';
+    // Subtle backdrop
+    ctx.fillStyle = 'rgba(9,9,13,0.35)';
     ctx.beginPath();
-    ctx.arc(cx, cy, size * 1.3, 0, Math.PI * 2);
+    ctx.arc(cx, cy, size * 1.25, 0, Math.PI * 2);
     ctx.fill();
 
-    // X Axis (Red)
-    ctx.strokeStyle = '#ef4444';
-    ctx.lineWidth = 1.5;
+    // X — muted red
+    ctx.strokeStyle = 'rgba(210, 100, 100, 0.6)';
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(xAxis.x, xAxis.y);
     ctx.stroke();
-    ctx.fillStyle = '#ef4444';
-    ctx.font = '8px monospace';
-    ctx.fillText('X', xAxis.x + 3, xAxis.y + 2);
+    ctx.fillStyle = 'rgba(210, 100, 100, 0.55)';
+    ctx.font = '7px Inter, sans-serif';
+    ctx.fillText('X', xAxis.x + 2, xAxis.y + 2);
 
-    // Y Axis (Green)
-    ctx.strokeStyle = '#10b981';
+    // Y — muted green
+    ctx.strokeStyle = 'rgba(90, 185, 130, 0.6)';
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(yAxis.x, yAxis.y);
     ctx.stroke();
-    ctx.fillStyle = '#10b981';
-    ctx.fillText('Y', yAxis.x + 3, yAxis.y + 2);
+    ctx.fillStyle = 'rgba(90, 185, 130, 0.55)';
+    ctx.fillText('Y', yAxis.x + 2, yAxis.y + 2);
 
-    // Z Axis (Blue)
-    ctx.strokeStyle = '#3b82f6';
+    // Z — muted blue
+    ctx.strokeStyle = 'rgba(90, 130, 220, 0.6)';
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(zAxis.x, zAxis.y);
     ctx.stroke();
-    ctx.fillStyle = '#3b82f6';
-    ctx.fillText('Z', zAxis.x + 3, zAxis.y + 2);
-
-    // Ring Border
-    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.arc(cx, cy, size * 1.3, 0, Math.PI * 2);
-    ctx.stroke();
+    ctx.fillStyle = 'rgba(90, 130, 220, 0.55)';
+    ctx.fillText('Z', zAxis.x + 2, zAxis.y + 2);
   };
 
   // MOUSE EVENT HANDLERS
@@ -966,40 +958,64 @@ export const SpaceCanvas: React.FC<SpaceCanvasProps> = ({
         id="celestial-canvas-element"
       />
 
-      {/* Launcher Quick Controls HUD Overlay */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 px-4 py-2 bg-slate-900/80 backdrop-blur-md rounded-full border border-slate-700/60 shadow-lg pointer-events-auto">
+      {/* Bottom launch bar */}
+      <div
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 pointer-events-auto"
+        style={{
+          background: 'rgba(20, 26, 40, 0.82)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255, 248, 235, 0.08)',
+          borderRadius: '99px',
+          padding: '6px 14px 6px 8px',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.35)',
+        }}
+      >
         <button
           onClick={startSpawnSequence}
           disabled={isSpawning}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all duration-300 ${
-            isSpawning
-              ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 animate-pulse'
-              : 'bg-cyan-600 hover:bg-cyan-500 text-slate-950 shadow-md shadow-cyan-600/20 hover:scale-105 active:scale-95'
-          }`}
+          className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[13px] font-semibold transition-all duration-150"
+          style={{
+            background: isSpawning ? 'rgba(255, 248, 235, 0.08)' : theme.colors.accent,
+            border: isSpawning ? '1px solid rgba(255, 248, 235, 0.18)' : 'none',
+            color: isSpawning ? theme.colors.accent : theme.colors.bgBase,
+            backdropFilter: 'blur(12px)',
+            transition: 'all 200ms cubic-bezier(0.16, 1, 0.3, 1)',
+            boxShadow: isSpawning ? 'none' : '0 8px 24px rgba(255, 248, 235, 0.08)',
+            transform: 'translateY(0)',
+          }}
+          onMouseEnter={(e) => { if (!isSpawning) { (e.currentTarget as HTMLButtonElement).style.background = '#FFFFFF'; (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)'; } }}
+          onMouseLeave={(e) => { if (!isSpawning) { (e.currentTarget as HTMLButtonElement).style.background = theme.colors.accent; (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)'; } }}
+          onMouseDown={(e) => { if (!isSpawning) (e.currentTarget as HTMLButtonElement).style.transform = 'scale(0.96)'; }}
+          onMouseUp={(e) => { if (!isSpawning) (e.currentTarget as HTMLButtonElement).style.transform = 'scale(1)'; }}
           id="btn-quick-launcher"
         >
           <RotateCw className="w-3.5 h-3.5" />
-          {isSpawning ? 'Aiming Orbit...' : `Launch ${spawnPreset.name}`}
+          {isSpawning ? 'Aim and release...' : `Launch ${spawnPreset.name}`}
         </button>
-
-        <div className="h-4 w-[1px] bg-slate-800" />
-
-        <label className="flex items-center gap-1.5 cursor-pointer">
+        <div className="h-4 w-px" style={{ background: 'rgba(255, 248, 235, 0.08)' }} />
+        <label className="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
             checked={useAutoOrbit}
             onChange={(e) => setUseAutoOrbit(e.target.checked)}
-            className="rounded border-slate-700 text-cyan-600 bg-slate-800 focus:ring-0 focus:ring-offset-0 w-3.5 h-3.5"
           />
-          <span className="text-[10px] font-mono text-slate-400">AUTO-ORBIT VELOCITY</span>
+          <span className="text-[13px] font-medium text-[#94A3B8]">Auto-orbit</span>
         </label>
       </div>
 
-      {/* Screen Interactive Overlay Help Banner when Spawning */}
+      {/* Spawn hint banner */}
       {isSpawning && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 px-4 py-2 bg-cyan-950/70 border border-cyan-800/80 text-cyan-300 text-xs font-mono rounded-lg shadow-xl animate-fade-in pointer-events-none text-center">
-          <p className="font-bold uppercase tracking-wider mb-0.5">SLINGSHOT AIM ACTIVE</p>
-          <p className="opacity-80">Drag on the canvas to set initial velocity vector & angle. Let go to launch.</p>
+        <div
+          className="absolute top-16 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-lg pointer-events-none text-center animate-fade-in"
+          style={{
+            background: 'rgba(20, 26, 40, 0.82)',
+            border: '1px solid rgba(255, 248, 235, 0.08)',
+            color: '#F8FAFC',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
+          }}
+        >
+          <p className="text-[13px] font-bold font-heading mb-0.5">Aim to set velocity</p>
+          <p className="text-[12px]" style={{ color: '#94A3B8' }}>Drag to set direction · release to launch</p>
         </div>
       )}
     </div>

@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { Compass, Move, Radio, Eye, Rocket, X, Orbit, RotateCw } from 'lucide-react';
+import { Compass, RotateCw, Rocket, X, Orbit } from 'lucide-react';
+import { theme } from '../theme/tokens';
 
 interface InstructionModalProps {
   onClose: () => void;
@@ -12,97 +13,116 @@ interface InstructionModalProps {
 
 export const InstructionModal: React.FC<InstructionModalProps> = ({ onClose }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md select-none animate-fade-in">
-      <div className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 text-slate-200 font-mono text-xs flex flex-col gap-5">
-        
-        {/* Close Button */}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 select-none animate-fade-in"
+      style={{ background: 'rgba(7, 9, 15, 0.8)', backdropFilter: 'blur(16px)' }}
+    >
+      <div
+        className="relative w-full max-w-md flex flex-col gap-6 animate-modal-in"
+        style={{
+          background: theme.colors.bgPanel,
+          border: `1px solid ${theme.colors.borderSubtle}`,
+          borderRadius: theme.radii.lg,
+          boxShadow: theme.shadows.panel,
+          padding: '28px',
+          fontFamily: theme.typography.fontSans,
+          color: theme.colors.textSecondary,
+        }}
+      >
+        {/* Close */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-colors"
+          className="absolute top-4 right-4 p-1.5 rounded-lg transition-all"
+          style={{ color: theme.colors.textMuted, background: 'transparent', border: 'none', cursor: 'pointer' }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = theme.colors.textPrimary; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255, 255, 255, 0.06)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = theme.colors.textMuted; (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
           id="btn-close-instruction-modal"
         >
           <X className="w-4 h-4" />
         </button>
 
-        {/* Modal Branding Header */}
-        <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
-          <Orbit className="w-5 h-5 text-cyan-400 animate-spin-slow" />
+        {/* Header */}
+        <div className="flex items-center gap-3 pb-4" style={{ borderBottom: `1px solid ${theme.colors.borderSubtle}` }}>
+          <div className="p-2 rounded-lg" style={{ background: theme.colors.accentGlow, border: `1px solid ${theme.colors.borderActive}` }}>
+            <Orbit className="w-5 h-5" style={{ color: theme.colors.accent }} />
+          </div>
           <div>
-            <h2 className="text-sm font-bold tracking-widest text-cyan-400 uppercase">3D ORBITAL SIMULATOR</h2>
-            <p className="text-[9px] text-slate-500 uppercase">Interactive Flight Manual & Command Console</p>
+            <h2 className="text-lg font-bold font-heading" style={{ color: theme.colors.textPrimary }}>Orbit Simulator</h2>
+            <p className="text-[12px]" style={{ color: theme.colors.textMuted }}>Interactive flight directives & controls</p>
           </div>
         </div>
 
-        {/* Interactive instructions section */}
-        <div className="flex flex-col gap-4 overflow-y-auto max-h-96 pr-1 scrollbar-thin">
-          
-          {/* Section: 3D Camera Controls */}
-          <div className="flex flex-col gap-2">
-            <span className="text-indigo-400 font-semibold tracking-wider text-[10px] uppercase border-b border-indigo-950 pb-1 flex items-center gap-1.5">
-              <Compass className="w-3.5 h-3.5" />
-              1. 3D Camera Space Navigation
-            </span>
-            <div className="grid grid-cols-2 gap-3 pl-1 text-[11px] leading-relaxed text-slate-400">
+        {/* Sections */}
+        <div className="flex flex-col gap-5 overflow-y-auto max-h-80 pr-1">
+
+          {/* Camera */}
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center gap-2 pb-1.5" style={{ borderBottom: `1px solid ${theme.colors.divider}` }}>
+              <Compass className="w-4 h-4" style={{ color: theme.colors.accent }} />
+              <span className="text-[13px] font-semibold font-heading" style={{ color: theme.colors.textPrimary }}>Camera Navigation</span>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[12px]" style={{ color: theme.colors.textSecondary }}>
               <div>
-                <b className="text-slate-200 block">ROTATE CAMERA:</b>
-                Left-Click and Drag on empty space to spin yaw/pitch.
+                <span className="font-semibold block mb-0.5" style={{ color: theme.colors.textPrimary }}>Rotate View</span>
+                Drag with left-click in empty space
               </div>
               <div>
-                <b className="text-slate-200 block">PAN CAMERA:</b>
-                Right-Click & Drag OR Shift+Left-Click to pan the target view.
+                <span className="font-semibold block mb-0.5" style={{ color: theme.colors.textPrimary }}>Pan Target</span>
+                Drag with right-click or Shift + drag
               </div>
               <div className="col-span-2">
-                <b className="text-slate-200 block">ZOOM SPACE FRAME:</b>
-                Scroll your mouse wheel (or use trackpad swipe) to zoom in or out.
+                <span className="font-semibold block mb-0.5" style={{ color: theme.colors.textPrimary }}>Zoom Viewport</span>
+                Scroll wheel or trackpad swipe
               </div>
             </div>
           </div>
 
-          {/* Section: Slingshot spawner */}
-          <div className="flex flex-col gap-2">
-            <span className="text-cyan-400 font-semibold tracking-wider text-[10px] uppercase border-b border-cyan-950 pb-1 flex items-center gap-1.5">
-              <RotateCw className="w-3.5 h-3.5" />
-              2. Slingshot Orbital Spawning
-            </span>
-            <div className="pl-1 text-[11px] leading-relaxed text-slate-400 flex flex-col gap-1.5">
+          {/* Spawning */}
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center gap-2 pb-1.5" style={{ borderBottom: `1px solid ${theme.colors.divider}` }}>
+              <RotateCw className="w-4 h-4" style={{ color: theme.colors.accent }} />
+              <span className="text-[13px] font-semibold font-heading" style={{ color: theme.colors.textPrimary }}>Stellar Launcher</span>
+            </div>
+            <div className="flex flex-col gap-2 text-[12px]" style={{ color: theme.colors.textSecondary }}>
               <p>
-                Click <b className="text-cyan-300">"Launch [Body]"</b> at the bottom of the screen.
+                Select a type in the spawner drawer, then click <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>Launch</span> at the bottom overlay.
               </p>
               <p>
-                A glowing preview body will appear. 
-                <b className="text-slate-200"> Drag your cursor</b> to draw a vector representing speed and trajectory. 
-                <b className="text-slate-200"> Release the cursor</b> to slingshot-launch the new celestial orbiter into space!
+                Drag your cursor to draw a trajectory velocity vector, then release to fire.
               </p>
-              <p className="bg-cyan-950/20 border border-cyan-900/40 p-2 rounded text-[10px] text-cyan-300">
-                💡 <b>PRO-TIP (Auto-Orbit):</b> Enabling <b>"AUTO-ORBIT"</b> automatically pre-calculates circular orbital speeds relative to the heaviest star. This ensures beautiful stable orbits instead of instant stellar crashes!
-              </p>
+              <div
+                className="px-3.5 py-2.5 rounded-lg text-[11px] leading-relaxed"
+                style={{ background: theme.colors.accentGlow, border: `1px solid ${theme.colors.borderActive}`, color: theme.colors.accent }}
+              >
+                <span className="font-bold">Auto-Orbit Mode:</span> Automates orbital circular vectors to match gravity parameters of the heaviest star, preventing collapse.
+              </div>
             </div>
           </div>
 
-          {/* Section: Orbital Mechanics Inspectors */}
-          <div className="flex flex-col gap-2">
-            <span className="text-emerald-400 font-semibold tracking-wider text-[10px] uppercase border-b border-emerald-950 pb-1 flex items-center gap-1.5">
-              <Rocket className="w-3.5 h-3.5" />
-              3. Advanced Flight Director Mode
-            </span>
-            <div className="pl-1 text-[11px] leading-relaxed text-slate-400 flex flex-col gap-2">
+          {/* Inspector */}
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center gap-2 pb-1.5" style={{ borderBottom: `1px solid ${theme.colors.divider}` }}>
+              <Rocket className="w-4 h-4" style={{ color: theme.colors.accent }} />
+              <span className="text-[13px] font-semibold font-heading" style={{ color: theme.colors.textPrimary }}>Orbital Analysis</span>
+            </div>
+            <div className="flex flex-col gap-2 text-[12px]" style={{ color: theme.colors.textSecondary }}>
               <p>
-                <b className="text-slate-200">Track and Follow:</b> Click any planet to open its flight telemetry inspector. Lock the camera, check its mass, or inspect if its current speed exceeds escape velocities!
+                Click any celestial object to trigger the inspector overlay. Customize weight parameters or lock the camera.
               </p>
               <p>
-                <b className="text-slate-200">First-Person Ride:</b> Click <b>"Ride Planet"</b> inside the inspector to mount the camera directly on the planet's surface and orbit through space as a pilot!
+                Use <span className="font-semibold" style={{ color: theme.colors.textPrimary }}>Ride</span> mode to lock the viewport perspective directly onto the body.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Footer Accept Button */}
+        {/* Footer */}
         <button
           onClick={onClose}
-          className="mt-2 w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold uppercase tracking-wider rounded-xl shadow-lg shadow-cyan-600/10 transition-all hover:scale-102 active:scale-98 text-center cursor-pointer"
+          className="w-full py-2.5 rounded-lg text-[14px] font-semibold transition-all duration-150 btn-primary"
           id="btn-modal-dismiss-enter"
         >
-          ENTER SYSTEM CORE
+          Begin exploration
         </button>
       </div>
     </div>

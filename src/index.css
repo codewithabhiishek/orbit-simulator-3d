@@ -1,1 +1,297 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+/* ─────────────────────────────────────────────
+   Design Tokens
+   ───────────────────────────────────────────── */
+:root {
+  --font-sans: 'Inter', sans-serif;
+  --font-heading: 'Playfair Display', 'Cormorant Garamond', 'Georgia', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Editorial Observatory Theme Colors */
+  --bg-base: #121110;
+  --bg-panel: #1F1D1B;
+  --text-primary: #F1ECE3;
+  --text-secondary: #C8C1B6;
+  --accent-primary: #F4EFE5;
+  --border-muted: rgba(255,248,235,0.08);
+  --border-active: rgba(255,248,235,0.15);
+  
+  --radius-sm: 0px;
+  --radius-md: 2px;
+  --radius-lg: 4px;
+
+  --duration-fast: 150ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─────────────────────────────────────────────
+   Base Reset
+   ───────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Atmospheric Overlay: Film Grain & Vignette */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  
+  /* Extremely faint film grain SVG data URI */
+  background-image: 
+    radial-gradient(circle at center, transparent 30%, rgba(10, 8, 6, 0.45) 120%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+  
+  /* Slight paper-like warmth */
+  background-color: rgba(221, 210, 194, 0.015);
+  mix-blend-mode: multiply;
+}
+
+/* ─────────────────────────────────────────────
+   Scrollbar
+   ───────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* ─────────────────────────────────────────────
+   Range Slider - Ultra Thin Solid
+   ───────────────────────────────────────────── */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--border-muted);
+  border-radius: 99px;
+  outline: none;
+  cursor: pointer;
+  transition: background var(--duration-fast) ease;
+}
+input[type="range"]:hover {
+  background: var(--border-active);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  cursor: pointer;
+  transition: transform var(--duration-fast) ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: none;
+  cursor: pointer;
+}
+
+/* ─────────────────────────────────────────────
+   Checkbox
+   ───────────────────────────────────────────── */
+input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1.5px solid rgba(255, 255, 255, 0.12); /* Input Border */
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: border-color var(--duration-fast) ease, background var(--duration-fast) ease;
+}
+input[type="checkbox"]:checked {
+  background: var(--accent); /* #E5E7EB */
+  border-color: var(--accent);
+}
+input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 1px;
+  width: 5px;
+  height: 8px;
+  border: 1.5px solid #111827; /* Dark checkmark */
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+input[type="checkbox"]:hover {
+  border-color: rgba(255, 255, 255, 0.18); /* Hover input border */
+}
+
+/* ─────────────────────────────────────────────
+   Premium Animations & Micro-Interactions
+   ───────────────────────────────────────────── */
+@keyframes fadeSlideInSidebar {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeSlideUpEvent {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes scaleFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeInSimple {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pulseGlow {
+  0% { opacity: 0.6; transform: scale(0.95); }
+  50% { opacity: 1.0; transform: scale(1.05); }
+  100% { opacity: 0.6; transform: scale(0.95); }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.animate-sidebar-in {
+  animation: fadeSlideInSidebar 300ms var(--ease-out) both;
+}
+
+.animate-event-in {
+  animation: fadeSlideUpEvent 250ms var(--ease-out) both;
+}
+
+.animate-panel-in {
+  animation: scaleFadeIn 250ms var(--ease-out) both;
+}
+
+.animate-fade-in {
+  animation: fadeInSimple 300ms var(--ease-out) both;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────
+   Orbit Ring (logo icon) — gentle, slow rotation
+   ───────────────────────────────────────────── */
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spinSlow 15s linear infinite;
+  opacity: 0.7;
+}
+
+/* ─────────────────────────────────────────────
+   Premium Interactions
+   ───────────────────────────────────────────── */
+.interactive-btn {
+  transition: transform 150ms var(--ease-out), background 150ms var(--ease-out), box-shadow 150ms var(--ease-out), filter 150ms var(--ease-out);
+}
+.interactive-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 12px rgba(10, 8, 6, 0.4);
+}
+.interactive-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(10, 8, 6, 0.2);
+  transition-duration: 50ms; /* snappy response */
+}
+
+.scenario-item {
+  transition: transform 200ms var(--ease-out), background 200ms var(--ease-out), border-color 200ms var(--ease-out);
+}
+.scenario-item:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 248, 235, 0.05) !important;
+  border-color: rgba(255, 248, 235, 0.08) !important;
+}
+.scenario-item:active {
+  transform: scale(0.99);
+}
+
+/* ─────────────────────────────────────────────
+   Premium Buttons
+   ───────────────────────────────────────────── */
+.btn-primary {
+  background: var(--accent-primary) !important;
+  color: var(--bg-base) !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(10, 8, 6, 0.5) !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius-lg) !important;
+  transition: transform var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out) !important;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background: #FFFFFF !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 16px rgba(10, 8, 6, 0.6) !important;
+}
+.btn-primary:active {
+  background: #DDD2C2 !important;
+  transform: translateY(0) !important;
+}
+
+/* ─────────────────────────────────────────────
+   Font Class Helpers
+   ───────────────────────────────────────────── */
+.font-heading {
+  font-family: var(--font-heading);
+}
+.font-mono {
+  font-family: var(--font-mono);
+}
+.font-sans {
+  font-family: var(--font-sans);
+}

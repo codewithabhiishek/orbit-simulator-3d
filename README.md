@@ -1,49 +1,64 @@
-# 🌌 3D Gravity Simulator
+# 🌌 Orbit Simulator
 
-An interactive, high-performance 3D gravity and celestial mechanics sandbox built with **React**, **TypeScript**, and **HTML5 Canvas**. This simulator lets you craft your own solar systems, launch planets, experiment with binary star systems, witness the extreme gravity of black holes with accretion disks, and ride along with any celestial body in real-time.
-
----
-
-## 🚀 Live Demo & Features
-
-### 🌟 Interactive Physics Sandbox
-* **N-Body Gravity Simulation:** Uses real Newtonian physics equations to simulate continuous gravitational attraction among all spawned bodies.
-* **Elastic Collisions & Mergers:** Stars, planets, and black holes collide realistically based on mass ratio, generating vibrant particle explosions.
-* **Black Hole & Accretion Disks:** Spawn supermassive black holes that pull in surrounding dust particles, forming glowing accretion disks with orbital decay.
-* **Orbital Path Projection:** Visualize orbits with real-time vector path tracing.
-
-### 🎥 Immersive Camera & Controls
-* **3D Perspective Camera:** Pitch, yaw, and zoom around the canvas in 3D space.
-* **Camera Modes:** Lock onto the barycenter, target a specific planet, or enter **Rider Mode** to see the cosmos from the surface of your planet.
-* **Interactive Spawning:** Aim and drag to launch planets with precise velocities, or spawn quick presets (Solar Systems, Binary Stars, Chaos fields).
-
-### ⚙️ Customizable Universe Settings
-* Real-time sliders to control:
-  * **Gravitational Constant (G)**
-  * **Simulation Speed / Time Dilation**
-  * **Collision Settings (Merge vs Bounce)**
-  * **Visual effects** (Trail length, Particle count, Grid alignments)
+An elegant, high-performance 3D gravity and celestial mechanics sandbox built with **React**, **TypeScript**, and **HTML5 Canvas**. The application utilizes Newtonian physics to simulate real-time gravitational attraction, allowing you to build solar systems, orchestrate binary star dances, spawn supermassive black holes, and track telemetry in a premium, professional monochrome mission-control interface.
 
 ---
 
-## 🛠️ Built With
+## 🛰️ Project Overview
 
-* **React 18** - Component-based user interface.
-* **TypeScript** - Strict typing for robust physical math calculations.
-* **HTML5 Canvas 2D Context** - Superb rendering performance for hundreds of bodies and thousands of particles.
-* **Tailwind CSS** - Modern, responsive HUD with glassmorphism panels.
-* **Lucide React** - High-quality iconography.
+Orbit Simulator is a space sandbox designed to make complex orbital mechanics visual and interactive. By utilizing a optimized N-body integration loop, it models continuous gravitational interactions between celestial bodies of varying masses.
+
+### Design Ideology
+The user interface is designed to "disappear." The UI stays almost completely monochrome, using color **only** when it communicates physical meaning (e.g. warm gold for stars, orange for collisions, red for errors, emerald for success). It is inspired by professional desktop programs like Apple Pro Apps, Space Engine, and NASA/JPL mission control.
+
+### Technologies Used
+- **Vite & React** — Lightweight structure and UI components
+- **TypeScript** — Strict mathematical typing
+- **HTML5 Canvas** — High-performance 2D/3D projection rendering
+- **Design Tokens** — Centralized variables for colors, typography, borders, shadows, and animations (`src/theme/tokens.ts`)
+- **Lucide React** — Premium UI iconography
 
 ---
 
-## 🏁 Quick Start
+## 🌟 Features
 
-Follow these steps to run the simulator locally on your machine.
+- **N-Body Gravitational Simulation**: True physics modeling of gravity between stars, planets, and black holes.
+- **Visual Collision Modes**: Choose between *Merge* (conservation of momentum where bodies absorb one another) or *Bounce* (elastic physical recoil).
+- **Scenario Presets**: Instantly load preset cosmic configurations:
+  - *Solar Oasis*: A stable star orbited by multiple planets and a dense asteroid belt.
+  - *Binary Dance*: A chaotic, beautiful orbit of two equal-mass stars.
+  - *Galactic Fusion*: Two colliding spiral galaxies composed of hundreds of space dust particles.
+  - *Event Horizon*: A doomed system centered around a supermassive black hole with an accretion disk.
+- **Slingshot Spawner**: Click and drag on the canvas to visually set the launch trajectory and velocity of new bodies.
+- **Event Console**: A styled, real-time telemetry log displaying collisions, merges, orbits, and spawns, color-coded and animated.
+- **Inspector Panel**: Click on any active body to customize its name and mass, review coordinates in a structured table, or sync orbital velocities.
+- **Auto Orbit**: Dynamically calculates stable circular orbit velocities relative to the heaviest local attractor during spawns.
+- **Adjustable Physics parameters**: Modify the Gravitational Constant ($G$) and Temporal Time-Scale in real-time.
+- **Responsive Mission Control UI**: 
+  - **VisionOS Glassmorphism**: Translucent floating panels (`0.35` opacity, `40px` blur, and deep shadows) replicate a native desktop app feel.
+  - **Fluid Micro-Interactions**: Custom hardware-accelerated animations (`animate-sidebar-in`, interactive hover button lifts, selection glow pulses) enrich interaction without overwhelming the UI.
+  - **Adaptive Viewport**: The layout intelligently adjusts for all displays (from 3440px Ultrawide down to 768px Tablets). Telemetry panels elegantly slide out of bounds on smaller resolutions to maximize the 3D space canvas while keeping key functionality preserved behind toggles.
 
-### Prerequisites
-Make sure you have [Node.js](https://nodejs.org/) installed (version 18+ recommended).
+---
 
-### 1. Clone the repository
+## 🏁 Installation & Setup
+
+Ensure you have [Node.js](https://nodejs.org/) installed (version 18+).
+
+### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/gravity-3d-sandbox.git
-cd gravity-3d-sandbox
+git clone https://github.com/codewithabhiishek/orbit-simulator-3d.git
+cd orbit-simulator-3d
+```
+
+### 2. Install Dependencies
+```bash
+npm install
+```
+
+### 3. Run Development Server
+```bash
+npm run dev
+```
+
+The application will be served at **http://localhost:3000/**.
